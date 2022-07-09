@@ -1,0 +1,21 @@
+<Files ecwid.js>
+    FileETag None
+    Header unset ETag
+    Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+</Files>
+<Files ecwid.css>
+    FileETag None
+    Header unset ETag
+    Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+</Files>
+<Files message.php>
+    AllowOverride All
+    Header always set Access-Control-Allow-Origin "https://store.ligalazdina.com"
+    Header always set Access-Control-Allow-Methods "POST, GET"
+    Header always set Access-Control-Allow-Headers "cache-control,expires,pragma,x-requested-with"
+    Header always set Access-Control-Expose-Headers "*"
+</Files>

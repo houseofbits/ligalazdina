@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,700&display=swap');
+
+body {
+    background: black;
+    font-family: 'Roboto', sans-serif;
+    user-select: none;
+}
+
+.default-content, .default-content-background {
+    position: absolute;
+    color: white;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.default-content-background {
+    background-image: url("@images/bg1.jpg");
+    filter: blur(8px);
+    opacity: 0.4;
+}
+
+h1 {
+    font-size: 72px;
+    font-weight: bold;
+    font-weight: 100;
+    text-shadow: 0 8px 6px rgba(0, 0, 0, 0.7);
+}
+
+h3 {
+    margin-top: -10px;
+    font-size: 24px;
+    font-weight: 500;
+}
+
+.links {
+    margin-top: 28px;
+    font-size: 38px;
+    font-weight: 400;
+    width: 400px;
+    display: flex;
+    justify-content: center;
+}
+
+a {
+    color: #ccd9f2;
+    font-weight: 300;
+    text-decoration: none;
+    padding: 6px;
+    padding-left: 24px;
+    padding-right: 24px;
+    margin-left: 16px;
+    margin-right: 16px;
+    cursor: pointer;
+    border: solid 1px rgba(1,1,1,0);
+    border-radius: 8px;
+    transition: all;
+    transition-duration: 200ms;
+}
+
+a:hover {
+    color: #b3c6ec;
+    border: solid 1px #b3c6ec;
+}
+
+img {
+    border-radius: 50%;
+    width:250px;
+    margin-bottom: 24px;
+}

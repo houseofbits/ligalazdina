@@ -1,0 +1,22 @@
+{
+  "name": "krists/liga-lazdina-portfolio",
+  "autoload": {
+    "psr-4": {
+      "LigaLazdinaPortfolio\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Krists Pudzens",
+      "email": "kpudzens@gmail.com"
+    }
+  ],
+  "require": {
+    "ext-intl": "*",
+    "ext-mysqli": "*",
+    "guzzlehttp/guzzle": "7.2.0",
+    "ext-json": "*",
+    "vlucas/phpdotenv": "^5.4",
+    "vitalybaev/google-merchant-feed": "^2.5"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "name": "ligalazdinia",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "prod": "webpack --mode=production",
+    "build": "webpack --mode=development",
+    "watch": "webpack --watch --mode=development",
+    "serve": "webpack serve --mode=development",
+    "serve:prod": "webpack serve --mode=production"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.16.0",
+    "@types/lodash": "^4.14.182",
+    "@vue/compiler-sfc": "^3.2.21",
+    "@webpack-cli/serve": "^1.2.1",
+    "autoprefixer": "^10.4.0",
+    "babel-loader": "^8.2.3",
+    "css-loader": "^4.3.0",
+    "file-loader": "^6.2.0",
+    "mini-css-extract-plugin": "^2",
+    "node-sass": "^4.14.1",
+    "postcss": "^8.3.11",
+    "postcss-loader": "^6.2.0",
+    "postcss-preset-env": "^6.7.0",
+    "raw-loader": "^4.0.1",
+    "sass-loader": "^10.0.2",
+    "tailwindcss": "^2.2.19",
+    "typescript": "^4.4.4",
+    "ts-loader": "^9.2.6",
+    "url-loader": "^4.1.1",
+    "vue-loader": "^16.0.0-rc.1",
+    "vue-style-loader": "^4.1.3",
+    "webpack": "^5",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-merge": "^5.2.0"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.1.1",
+    "@fortawesome/free-brands-svg-icons": "^6.1.1",
+    "@fortawesome/free-regular-svg-icons": "^6.1.1",
+    "@fortawesome/free-solid-svg-icons": "^6.1.1",
+    "@fortawesome/vue-fontawesome": "^3.0.1",
+    "@tailwindcss/aspect-ratio": "^0.3.0",
+    "@tailwindcss/typography": "^0.4.1",
+    "axios": "^0.21.1",
+    "hammerjs": "^2.0.8",
+    "yup": "^0.32.11",
+    "lodash": "^4.17.21",
+    "popper.js": "^1.16.1",
+    "vee-validate": "^4.5.11",
+    "vue": "^3.2.21",
+    "vue-router": "^4.0.12"
+  },
+  "browser": {
+    "buffer": false
+  }
+}
