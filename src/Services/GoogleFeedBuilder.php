@@ -2,66 +2,68 @@
 
 namespace LigaLazdinaPortfolio\Services;
 
-use LigaLazdinaPortfolio\Structures\ItemStructure;
+use LigaLazdinaPortfolio\Entities\Product;
 use Vitalybaev\GoogleMerchant\Feed;
-use Vitalybaev\GoogleMerchant\Product;
+use Vitalybaev\GoogleMerchant\Product as FeedProduct;
 use Vitalybaev\GoogleMerchant\Product\Availability\Availability;
 
 class GoogleFeedBuilder
 {
-    public function buildFeed(array $items): Feed
+    /**
+     * @param Product[] $products
+     * @return Feed
+     */
+    public function buildFeed(array $products): Feed
     {
         $feed = new Feed("Liga Lazdina Store", "https://store.ligalazdina.com", "Liga Lazdina Store");
 
-        $enabledItems = array_filter($items, fn(ItemStructure $item) => $item->isEnabled);
-
-        foreach ($enabledItems as $item) {
-            $product = $this->buildFromItem($item);
-            $feed->addProduct($product);
+        foreach ($products as $product) {
+            $feedProduct = $this->buildFromProduct($product);
+            $feed->addProduct($feedProduct);
         }
 
         return $feed;
     }
 
-    public function buildFromItem(ItemStructure $item): Product
+    public function buildFromProduct(Product $product): FeedProduct
     {
-        $product = new Product();
+        $feedProduct = new FeedProduct();
 
-        $product->setId($item->variantId);
-        $product->setTitle($item->title);
-        $product->setDescription($item->description);
-        $product->setLink($item->url);
-        $product->setImage($item->imageUrl);
-        $product->setAvailability(Availability::IN_STOCK);
-        $product->setPrice($item->price);
-        $product->setGoogleCategory($item->googleProductCategory);
-        $product->setCondition('new');
-        $product->setIdentifierExists('no');
+        $feedProduct->setId($product->getSku());
+        $feedProduct->setTitle($product->getTitle());
+        $feedProduct->setDescription($product->getDescription());
+        $feedProduct->setLink($product->getStoreUrl());
+        $feedProduct->setImage($product->getImageUrl());
+        $feedProduct->setAvailability(Availability::IN_STOCK);
+        $feedProduct->setPrice($product->getPrice());
+        $feedProduct->setGoogleCategory($product->getGoogleProductCategoryId());
+        $feedProduct->setCondition('new');
+        $feedProduct->setIdentifierExists('no');
 
-        if ($item->isVariation()) {
-            $product->addAttribute('item_group_id', $item->itemId);
+        if ($product->isVariation()) {
+            $feedProduct->addAttribute('item_group_id', $product->getGroupSku());
         }
 
-        if ($item->color) {
-            $product->setColor($item->color);
+        if ($product->getColor()) {
+            $feedProduct->setColor($product->getColor());
         }
 
-        if ($item->size) {
-            $product->setSize($item->size);
+        if ($product->getSize()) {
+            $feedProduct->setSize($product->getSize());
         }
 
-        if ($item->gender) {
-            $product->addAttribute('gender', $item->gender);
+        if ($product->getGender()) {
+            $feedProduct->addAttribute('gender', $product->getGender());
         }
 
-        if ($item->ageGroup) {
-            $product->addAttribute('age_group', $item->ageGroup);
+        if ($product->getAgeGroup()) {
+            $feedProduct->addAttribute('age_group', $product->getAgeGroup());
         }
 
-        $product->addAttribute('included_destination', 'Free_listings');
-        $product->addAttribute('excluded_destination', 'Shopping_ads');
+        $feedProduct->addAttribute('included_destination', 'Free_listings');
+        $feedProduct->addAttribute('excluded_destination', 'Shopping_ads');
 
-        return $product;
+        return $feedProduct;
     }
 
 }

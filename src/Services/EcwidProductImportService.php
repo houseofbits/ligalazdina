@@ -2,56 +2,82 @@
 
 namespace LigaLazdinaPortfolio\Services;
 
-use Exception;
+use LigaLazdinaPortfolio\Entities\Product;
 use LigaLazdinaPortfolio\Helpers\Console;
+use LigaLazdinaPortfolio\Repositories\ProductRepository;
 
 class EcwidProductImportService
 {
     private EcwidRequestService $request;
-    private ItemBuilder $itemBuilder;
-    private ProductFeedRepository $repository;
+    private ProductVariationsBuilder $productVariationsBuilder;
+    private ProductRepository $repository;
 
-    public function __construct()
+    public function __construct(
+        EcwidRequestService      $request,
+        ProductVariationsBuilder $productVariationsBuilder,
+        ProductRepository        $repository
+    )
     {
-        $this->request = new EcwidRequestService();
-        $this->itemBuilder = new ItemBuilder();
-        $this->repository = new ProductFeedRepository();
+        $this->request = $request;
+        $this->productVariationsBuilder = $productVariationsBuilder;
+        $this->repository = $repository;
     }
 
-    public function fetchProducts(?string $productId): array
+    /**
+     * @return Product[]
+     */
+    public function fetchAll(): array
     {
-        if ($productId) {
-            $allProducts = [$this->request->get('products/' . $productId)];
-        } else {
-            $allProducts = $this->request->get('products');
-            $allProducts = $allProducts->items ?? [];
-        }
+        $allProducts = $this->request->get('products');
+        $allProducts = $allProducts->items ?? [];
 
         Console::printLn(count($allProducts) . ' products fetched from Ecwid');
 
         $products = [];
         foreach ($allProducts as $productData) {
-            $products = array_merge($products, $this->itemBuilder->buildItemWithOptions($productData));
+            $products = array_merge($products, $this->productVariationsBuilder->buildProductVariationsFromEcwidProduct($productData));
         }
 
-        Console::printLn(count($products) . ' products with variations created');
+        Console::printLn(count($products) . ' product variations generated');
 
         return $products;
     }
 
-    public function fetchProductsAndPersist(?string $productId): void
+    /**
+     * @return Product[]
+     */
+    public function fetchProductVariationsByEcwidId(string $ecwidProductId): array
     {
-        $products = $this->fetchProducts($productId);
+        $productData = $this->request->get('products/' . $ecwidProductId);
 
-        try {
-            $this->repository->transaction(function () use ($products) {
-                foreach ($products as $product) {
-                    $this->repository->persistItem($product);
-                }
-            });
-            Console::printLn(count($products) . ' products persisted', 's');
-        } catch (Exception $exception) {
-            Console::printLn('Failed to persisted product. ' . $exception->getMessage(), 'e');
+        if (!empty($productData)) {
+            Console::printLn('1 product fetched from Ecwid');
+
+            $products = $this->productVariationsBuilder->buildProductVariationsFromEcwidProduct($productData);
+
+            Console::printLn(count($products) . ' product variations generated');
+
+            return $products;
+        }
+
+        return [];
+    }
+
+    public function importAll(): void
+    {
+        $products = $this->fetchAll();
+
+        if (!empty($products)) {
+            $this->repository->persistAll($products);
+        }
+    }
+
+    public function importProductVariationsByEcwidId(string $ecwidProductId): void
+    {
+        $products = $this->fetchProductVariationsByEcwidId($ecwidProductId);
+
+        if (!empty($products)) {
+            $this->repository->persistAll($products);
         }
     }
 }
