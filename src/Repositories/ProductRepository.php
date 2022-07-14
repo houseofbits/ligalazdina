@@ -44,4 +44,14 @@ class ProductRepository extends EntityRepository
     {
         return $this->findBy(['deletedAt' => null]);
     }
+
+    public function removeAll(): void
+    {
+        $this->createQueryBuilder('p')
+            ->delete()
+            ->getQuery()
+            ->execute();
+
+        $this->getEntityManager()->flush();
+    }
 }

@@ -21,8 +21,9 @@ class EcwidConsoleRunner extends ConsoleRunner
     public function help()
     {
         Console::printLn("- dry-import [ECWID-Product-Id]");
-        Console::printLn("- import [ECWID-Product-Id]");
+        Console::printLn("- import-products [ECWID-Product-Id]");
         Console::printLn("- list-product");
+        Console::printLn("- clear-products");
     }
 
     public function dryImport(?string $ecwidProductId = null): void
@@ -34,7 +35,7 @@ class EcwidConsoleRunner extends ConsoleRunner
         }
     }
 
-    public function import(?string $ecwidProductId = null): void
+    public function importProducts(?string $ecwidProductId = null): void
     {
         if ($ecwidProductId) {
             $this->importService->importProductVariationsByEcwidId($ecwidProductId);
@@ -46,7 +47,13 @@ class EcwidConsoleRunner extends ConsoleRunner
     public function listProducts(): void
     {
         $products = $this->repository->findAll();
-        var_dump(count($products));
+        Console::printLn(count($products) . " products", 's');
+    }
+
+    public function clearProducts(): void
+    {
+        $this->repository->removeAll();
+        Console::printLn('Done', 's');
     }
 
 

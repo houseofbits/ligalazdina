@@ -23,6 +23,11 @@ class Product
     protected int $id;
 
     /**
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    protected ?int $productType = null;
+
+    /**
      * @ORM\Column(type="string", length=150)
      */
     protected string $sku;
@@ -53,7 +58,7 @@ class Product
     protected string $description;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", length=60)
      */
     protected string $price;
 
@@ -85,6 +90,12 @@ class Product
     public function setId(int $id): Product
     {
         $this->id = $id;
+        return $this;
+    }
+
+    public function setProductType(int $productType): Product
+    {
+        $this->productType = $productType;
         return $this;
     }
 
@@ -163,6 +174,11 @@ class Product
     public function getId(): int
     {
         return $this->id;
+    }
+
+    public function getProductType(): int
+    {
+        return $this->productType;
     }
 
     public function getSku(): string
