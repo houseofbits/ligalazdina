@@ -12,11 +12,3 @@ $dotenv->safeLoad();
 /** @var EcwidConsoleRunner $ecwidConsole */
 $ecwidConsole = Application::get(EcwidConsoleRunner::class);
 $ecwidConsole->run($argv);
-
-
-/*
- * TODO:
- *  clean - command
- *  products.php listing
- *  Shipping price Entity setup
- * */

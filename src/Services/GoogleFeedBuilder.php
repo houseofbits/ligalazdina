@@ -2,13 +2,29 @@
 
 namespace LigaLazdinaPortfolio\Services;
 
+use Exception;
 use LigaLazdinaPortfolio\Entities\Product;
+use LigaLazdinaPortfolio\Entities\ShippingRate;
+use LigaLazdinaPortfolio\Helpers\Formatter;
+use LigaLazdinaPortfolio\Repositories\ShippingRateRepository;
+use Vitalybaev\GoogleMerchant\Exception\InvalidArgumentException;
 use Vitalybaev\GoogleMerchant\Feed;
 use Vitalybaev\GoogleMerchant\Product as FeedProduct;
 use Vitalybaev\GoogleMerchant\Product\Availability\Availability;
+use Vitalybaev\GoogleMerchant\Product\Shipping;
 
 class GoogleFeedBuilder
 {
+    private ShippingRateRepository $shippingRateRepository;
+    private ShippingZoneMapper $zoneMapper;
+
+    public function __construct(ShippingRateRepository $shippingRateRepository,
+                                ShippingZoneMapper     $zoneMapper)
+    {
+        $this->shippingRateRepository = $shippingRateRepository;
+        $this->zoneMapper = $zoneMapper;
+    }
+
     /**
      * @param Product[] $products
      * @return Feed
@@ -25,6 +41,10 @@ class GoogleFeedBuilder
         return $feed;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws Exception
+     */
     public function buildFromProduct(Product $product): FeedProduct
     {
         $feedProduct = new FeedProduct();
@@ -35,7 +55,7 @@ class GoogleFeedBuilder
         $feedProduct->setLink($product->getStoreUrl());
         $feedProduct->setImage($product->getImageUrl());
         $feedProduct->setAvailability(Availability::IN_STOCK);
-        $feedProduct->setPrice($product->getPrice());
+        $feedProduct->setPrice(Formatter::formattedPrice($product->getPrice()));
         $feedProduct->setGoogleCategory($product->getGoogleProductCategoryId());
         $feedProduct->setCondition('new');
         $feedProduct->setIdentifierExists('no');
@@ -63,7 +83,37 @@ class GoogleFeedBuilder
         $feedProduct->addAttribute('included_destination', 'Free_listings');
         $feedProduct->addAttribute('excluded_destination', 'Shopping_ads');
 
+        $this->setShippingRates($feedProduct, $product->getShippingProductType(), ShippingZoneMapper::ZONE_US);
+
         return $feedProduct;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function setShippingRates(FeedProduct $feedProduct, int $productType, int $zone): void
+    {
+        /** @var ShippingRate $rate */
+        $rate = $this->shippingRateRepository->findRate($productType, $zone);
+
+        if (!$rate) {
+            throw new Exception('Shipping rate not found for product');
+        }
+
+        $countryCodes = $this->zoneMapper->getCountryCodesForZone($zone);
+
+        if (empty($countryCodes)) {
+            throw new Exception('No country codes found for zone');
+        }
+
+        foreach ($countryCodes as $countryCode) {
+            $shipping = new Shipping();
+            $shipping->setCountry($countryCode);
+            $shipping->setPrice(Formatter::formattedPrice($rate->getPrice()));
+            // ...
+
+            $feedProduct->addShipping($shipping);
+        }
     }
 
 }

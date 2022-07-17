@@ -2,20 +2,26 @@
 
 namespace LigaLazdinaPortfolio\Services;
 
+use LigaLazdinaPortfolio\Helpers\Application;
 use LigaLazdinaPortfolio\Helpers\Console;
+use LigaLazdinaPortfolio\Migrations\ShippingRatesMigration;
 use LigaLazdinaPortfolio\Repositories\ProductRepository;
+use LigaLazdinaPortfolio\Repositories\ShippingRateRepository;
 
 class EcwidConsoleRunner extends ConsoleRunner
 {
     private EcwidProductImportService $importService;
     private ProductRepository $repository;
+    private ShippingRateRepository $shippingRateRepository;
 
     public function __construct(EcwidProductImportService $importService,
-                                ProductRepository         $repository
+                                ProductRepository         $repository,
+                                ShippingRateRepository $shippingRateRepository
     )
     {
         $this->importService = $importService;
         $this->repository = $repository;
+        $this->shippingRateRepository = $shippingRateRepository;
     }
 
     public function help()
@@ -56,5 +62,12 @@ class EcwidConsoleRunner extends ConsoleRunner
         Console::printLn('Done', 's');
     }
 
+    public function migrateShippingRates(): void
+    {
+        $this->shippingRateRepository->removeAll();
 
+        Application::get(ShippingRatesMigration::class)->migrate();
+
+        Console::printLn('Done', 's');
+    }
 }

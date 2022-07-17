@@ -25,7 +25,7 @@ class Product
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
-    protected ?int $productType = null;
+    protected ?int $shippingProductType = null;
 
     /**
      * @ORM\Column(type="string", length=150)
@@ -58,9 +58,9 @@ class Product
     protected string $description;
 
     /**
-     * @ORM\Column(type="string", length=60)
+     * @ORM\Column(type="integer")
      */
-    protected string $price;
+    protected int $price;
 
     /**
      * @ORM\Column(type="string", nullable=true)
@@ -93,9 +93,9 @@ class Product
         return $this;
     }
 
-    public function setProductType(int $productType): Product
+    public function setShippingProductType(int $shippingProductType): Product
     {
-        $this->productType = $productType;
+        $this->shippingProductType = $shippingProductType;
         return $this;
     }
 
@@ -135,7 +135,7 @@ class Product
         return $this;
     }
 
-    public function setPrice(string $price): Product
+    public function setPrice(int $price): Product
     {
         $this->price = $price;
         return $this;
@@ -176,9 +176,9 @@ class Product
         return $this->id;
     }
 
-    public function getProductType(): int
+    public function getShippingProductType(): int
     {
-        return $this->productType;
+        return $this->shippingProductType;
     }
 
     public function getSku(): string
@@ -211,7 +211,7 @@ class Product
         return $this->description;
     }
 
-    public function getPrice(): string
+    public function getPrice(): int
     {
         return $this->price;
     }

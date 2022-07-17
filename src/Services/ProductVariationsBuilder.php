@@ -2,7 +2,9 @@
 
 namespace LigaLazdinaPortfolio\Services;
 
+use Exception;
 use LigaLazdinaPortfolio\Entities\Product;
+use LigaLazdinaPortfolio\Helpers\Console;
 use LigaLazdinaPortfolio\Structures\ItemOptionsStructure;
 use NumberFormatter;
 
@@ -19,23 +21,60 @@ class ProductVariationsBuilder
         130262272, //Laptop sleeve
     ];
 
+    private ShippingProductTypeMapper $productTypeMapper;
+
+    public function __construct(ShippingProductTypeMapper $productTypeMapper)
+    {
+        $this->productTypeMapper = $productTypeMapper;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function validateEcwidProduct(object $productData): void
+    {
+        if (empty($productData->googleProductCategory)) {
+            throw new Exception("Missing googleProductCategory");
+        }
+
+        if (!is_array($productData->attributes)) {
+            throw new Exception("Missing attributes");
+        }
+
+        if (!$this->getAttributeValue($productData->attributes, 'ShippingProductType')) {
+            throw new Exception("Missing ShippingProductType attribute");
+        }
+
+        $shippingProductType = $this->getAttributeValue($productData->attributes, 'ShippingProductType');
+
+        $this->productTypeMapper->validateProductData($shippingProductType, $productData->options);
+    }
+
     /**
      * @param object $productData
      * @return Product[]
      */
     public function buildProductVariationsFromEcwidProduct(object $productData): array
     {
-        $combinations = $this->getProductOptions($productData->options);
-        if (!empty($combinations)) {
-            $combinations = $this->cartesian($combinations);
-            $result = [];
-            foreach ($combinations as $index => $options) {
-                $result[] = $this->buildProduct($productData, $index, $options);
-            }
-            return $result;
-        }
+        try {
+            $this->validateEcwidProduct($productData);
 
-        return [$this->buildProduct($productData)];
+            $result = [];
+            $combinations = $this->getProductOptions($productData->options);
+            if (!empty($combinations)) {
+                $combinations = $this->cartesian($combinations);
+                foreach ($combinations as $index => $options) {
+                    $result[] = $this->buildProduct($productData, $index, $options);
+                }
+            } else {
+                $result = [$this->buildProduct($productData)];
+            }
+
+            return $result;
+        } catch (Exception $e) {
+            Console::printLn($productData->id . " | " . $e->getMessage(), 'e');
+        }
+        return [];
     }
 
     private function buildProduct(object $productData, int $index = 0, array $options = []): Product
@@ -43,6 +82,7 @@ class ProductVariationsBuilder
         $product = new Product();
 
         $price = $this->calculatePriceWithOptions($productData->price, $options);
+        $shippingProductType = $this->getAttributeValue($productData->attributes, 'ShippingProductType');
 
         $product->setSku($this->createVariantSku($productData->sku, $options))
             ->setGroupSku($productData->sku)
@@ -50,12 +90,16 @@ class ProductVariationsBuilder
             ->setImageUrl($productData->imageUrl)
             ->setTitle($this->createTitle($productData->name, $productData->subtitle, $options))
             ->setDescription(strip_tags($productData->description))
-            ->setPrice($this->createFormattedPrice($price, $productData->tax->defaultLocationIncludedTaxRate))
+            ->setPrice($this->createPrice($price, $productData->tax->defaultLocationIncludedTaxRate))
             ->setColor($this->getOptionValue($options, 'color'))
             ->setSize($this->getOptionValue($options, 'size'))
             ->setGoogleProductCategoryId($productData->googleProductCategory)
             ->setAgeGroup(null)
-            ->setGender(null);
+            ->setGender(null)
+            ->setShippingProductType($this->productTypeMapper->getShippingProductType(
+                $shippingProductType,
+                $this->getOptionValue($options, 'size')
+            ));
 
         if ($this->shouldMatchImagesToVariants($productData->categoryIds)) {
             $product->setImageUrl($this->getVariantImageByOptionIndex($productData->media->images, $index) ?? $productData->imageUrl);
@@ -102,14 +146,10 @@ class ProductVariationsBuilder
         return $basePrice;
     }
 
-    private function createFormattedPrice($price, $tax): string
+    private function createPrice(float $price, float $tax): int
     {
-        $fmt = new NumberFormatter('de_DE', NumberFormatter::CURRENCY);
-
         $taxAmount = $price * $tax / 100;
-        $total = $price + $taxAmount;
-
-        return $fmt->formatCurrency($total, "EUR");
+        return round(($price + $taxAmount) * 100);
     }
 
     /**
@@ -216,6 +256,17 @@ class ProductVariationsBuilder
     {
         if (isset($images[$index])) {
             return $images[$index]->image1500pxUrl;
+        }
+
+        return null;
+    }
+
+    private function getAttributeValue(array $attributes, string $name): ?string
+    {
+        foreach ($attributes as $attribute) {
+            if ($attribute->name === $name) {
+                return $attribute->value;
+            }
         }
 
         return null;

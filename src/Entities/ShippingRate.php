@@ -26,9 +26,9 @@ class ShippingRate
     protected int $productType;
 
     /**
-     * @ORM\Column(type="string", length=50)
+     * @ORM\Column(type="integer")
      */
-    protected string $country;
+    protected int $zone;
 
     /**
      * @ORM\Column(type="integer")
@@ -41,9 +41,14 @@ class ShippingRate
     protected int $maxTransitTime;
 
     /**
-     * @ORM\Column(type="string", length=60)
+     * @ORM\Column(type="integer")
      */
-    protected string $price;
+    protected int $price;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    protected int $extraPrice;
 
     public function setId(int $id): ShippingRate
     {
@@ -57,9 +62,9 @@ class ShippingRate
         return $this;
     }
 
-    public function setCountry(string $country): ShippingRate
+    public function setZone(int $zone): ShippingRate
     {
-        $this->country = $country;
+        $this->zone = $zone;
         return $this;
     }
 
@@ -75,9 +80,15 @@ class ShippingRate
         return $this;
     }
 
-    public function setPrice(string $price): ShippingRate
+    public function setPrice(int $price): ShippingRate
     {
         $this->price = $price;
+        return $this;
+    }
+
+    public function setExtraPrice(int $extraPrice): ShippingRate
+    {
+        $this->extraPrice = $extraPrice;
         return $this;
     }
 
@@ -91,9 +102,9 @@ class ShippingRate
         return $this->productType;
     }
 
-    public function getCountry(): string
+    public function getZone(): int
     {
-        return $this->country;
+        return $this->zone;
     }
 
     public function getMinTransitTime(): int
@@ -106,8 +117,13 @@ class ShippingRate
         return $this->maxTransitTime;
     }
 
-    public function getPrice(): string
+    public function getPrice(): int
     {
         return $this->price;
+    }
+
+    public function getExtraPrice(): int
+    {
+        return $this->extraPrice;
     }
 }
