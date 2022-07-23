@@ -6,7 +6,6 @@ use Exception;
 use LigaLazdinaPortfolio\Entities\Product;
 use LigaLazdinaPortfolio\Helpers\Console;
 use LigaLazdinaPortfolio\Structures\ItemOptionsStructure;
-use NumberFormatter;
 
 class ProductVariationsBuilder
 {
@@ -21,11 +20,11 @@ class ProductVariationsBuilder
         130262272, //Laptop sleeve
     ];
 
-    private ShippingProductTypeMapper $productTypeMapper;
+    private PrintfulService $printfulService;
 
-    public function __construct(ShippingProductTypeMapper $productTypeMapper)
+    public function __construct(PrintfulService $printfulService)
     {
-        $this->productTypeMapper = $productTypeMapper;
+        $this->printfulService = $printfulService;
     }
 
     /**
@@ -41,13 +40,9 @@ class ProductVariationsBuilder
             throw new Exception("Missing attributes");
         }
 
-        if (!$this->getAttributeValue($productData->attributes, 'ShippingProductType')) {
-            throw new Exception("Missing ShippingProductType attribute");
+        if (!$this->getAttributeValue($productData->attributes, 'PrintfulProductId')) {
+            throw new Exception("Missing PrintfulProductId attribute");
         }
-
-        $shippingProductType = $this->getAttributeValue($productData->attributes, 'ShippingProductType');
-
-        $this->productTypeMapper->validateProductData($shippingProductType, $productData->options);
     }
 
     /**
@@ -82,7 +77,7 @@ class ProductVariationsBuilder
         $product = new Product();
 
         $price = $this->calculatePriceWithOptions($productData->price, $options);
-        $shippingProductType = $this->getAttributeValue($productData->attributes, 'ShippingProductType');
+        $printfulProductId = $this->getAttributeValue($productData->attributes, 'PrintfulProductId');
 
         $product->setSku($this->createVariantSku($productData->sku, $options))
             ->setGroupSku($productData->sku)
@@ -95,11 +90,14 @@ class ProductVariationsBuilder
             ->setSize($this->getOptionValue($options, 'size'))
             ->setGoogleProductCategoryId($productData->googleProductCategory)
             ->setAgeGroup(null)
-            ->setGender(null)
-            ->setShippingProductType($this->productTypeMapper->getShippingProductType(
-                $shippingProductType,
-                $this->getOptionValue($options, 'size')
-            ));
+            ->setGender(null);
+
+        $printfulVariantId = $this->printfulService->getVariantId(
+            $printfulProductId,
+            $this->getOptionValue($options, 'size'),
+            $this->getOptionValue($options, 'color')
+        );
+        $product->setPrintfulVariantId($printfulVariantId);
 
         if ($this->shouldMatchImagesToVariants($productData->categoryIds)) {
             $product->setImageUrl($this->getVariantImageByOptionIndex($productData->media->images, $index) ?? $productData->imageUrl);
@@ -140,7 +138,7 @@ class ProductVariationsBuilder
     private function calculatePriceWithOptions(float $basePrice, array $options = []): float
     {
         if (!empty($options)) {
-            return array_walk($options, fn(ItemOptionsStructure $optionsStructure, float $acc) => $acc + $optionsStructure->priceModifier, $basePrice);
+            return array_reduce($options, fn(float $acc, ItemOptionsStructure $optionsStructure) => $acc + $optionsStructure->priceModifier, $basePrice);
         }
 
         return $basePrice;

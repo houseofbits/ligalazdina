@@ -24,8 +24,28 @@ class ShippingRateRepository extends EntityRepository
         $this->getEntityManager()->flush();
     }
 
-    public function findRate(int $productType, int $zone): ?ShippingRate
+    public function findRate(string $printfulVariantId, int $zone): ?ShippingRate
     {
-        return $this->findOneBy(['productType' => $productType, 'zone' => $zone]);
+        return $this->findOneBy(['printfulVariantId' => $printfulVariantId, 'zone' => $zone]);
+    }
+
+    public function findRatesForProduct(string $printfulVariantId): array
+    {
+        return $this->findBy(['printfulVariantId' => $printfulVariantId]);
+    }
+
+    public function persist(ShippingRate $rate, bool $flush = true): void
+    {
+        $existingRate = $this->findRate($rate->getPrintfulVariantId(), $rate->getZone());
+
+        if ($existingRate) {
+            $rate->setId($existingRate->getId());
+        }
+
+        $this->getEntityManager()->merge($rate);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

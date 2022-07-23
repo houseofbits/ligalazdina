@@ -55,7 +55,7 @@ class GoogleFeedBuilder
         $feedProduct->setLink($product->getStoreUrl());
         $feedProduct->setImage($product->getImageUrl());
         $feedProduct->setAvailability(Availability::IN_STOCK);
-        $feedProduct->setPrice(Formatter::formattedPrice($product->getPrice()));
+        $feedProduct->setPrice($product->getFormattedPrice());
         $feedProduct->setGoogleCategory($product->getGoogleProductCategoryId());
         $feedProduct->setCondition('new');
         $feedProduct->setIdentifierExists('no');
@@ -83,7 +83,7 @@ class GoogleFeedBuilder
         $feedProduct->addAttribute('included_destination', 'Free_listings');
         $feedProduct->addAttribute('excluded_destination', 'Shopping_ads');
 
-        $this->setShippingRates($feedProduct, $product->getShippingProductType(), ShippingZoneMapper::ZONE_US);
+        $this->setShippingRates($feedProduct, $product->getPrintfulVariantId(), ShippingZoneMapper::ZONE_US);
 
         return $feedProduct;
     }
@@ -91,29 +91,29 @@ class GoogleFeedBuilder
     /**
      * @throws Exception
      */
-    private function setShippingRates(FeedProduct $feedProduct, int $productType, int $zone): void
+    private function setShippingRates(FeedProduct $feedProduct, string $printfulVariantId, int $zone): void
     {
         /** @var ShippingRate $rate */
-        $rate = $this->shippingRateRepository->findRate($productType, $zone);
+        $rate = $this->shippingRateRepository->findRate($printfulVariantId, $zone);
 
         if (!$rate) {
             throw new Exception('Shipping rate not found for product');
         }
 
-        $countryCodes = $this->zoneMapper->getCountryCodesForZone($zone);
+        $countryCode = $this->zoneMapper->getCountryCodeForZone($zone);
+//
+//        if (empty($countryCodes)) {
+//            throw new Exception('No country codes found for zone');
+//        }
 
-        if (empty($countryCodes)) {
-            throw new Exception('No country codes found for zone');
-        }
-
-        foreach ($countryCodes as $countryCode) {
+        //foreach ($countryCodes as $countryCode) {
             $shipping = new Shipping();
             $shipping->setCountry($countryCode);
             $shipping->setPrice(Formatter::formattedPrice($rate->getPrice()));
             // ...
 
             $feedProduct->addShipping($shipping);
-        }
+        //}
     }
 
 }

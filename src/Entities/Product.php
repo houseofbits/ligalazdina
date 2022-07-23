@@ -5,6 +5,7 @@ namespace LigaLazdinaPortfolio\Entities;
 use Doctrine\ORM\Mapping as ORM;
 use LigaLazdinaPortfolio\Entities\Traits\SoftDeleteTrait;
 use LigaLazdinaPortfolio\Entities\Traits\TimestampableTrait;
+use LigaLazdinaPortfolio\Helpers\Formatter;
 
 /**
  * @ORM\Entity
@@ -23,9 +24,9 @@ class Product
     protected int $id;
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="string", length=150, nullable=true)
      */
-    protected ?int $shippingProductType = null;
+    protected ?string $printfulVariantId = null;
 
     /**
      * @ORM\Column(type="string", length=150)
@@ -93,9 +94,9 @@ class Product
         return $this;
     }
 
-    public function setShippingProductType(int $shippingProductType): Product
+    public function setPrintfulVariantId(?string $printfulVariantId): Product
     {
-        $this->shippingProductType = $shippingProductType;
+        $this->printfulVariantId = $printfulVariantId;
         return $this;
     }
 
@@ -176,9 +177,9 @@ class Product
         return $this->id;
     }
 
-    public function getShippingProductType(): int
+    public function getPrintfulVariantId(): ?string
     {
-        return $this->shippingProductType;
+        return $this->printfulVariantId;
     }
 
     public function getSku(): string
@@ -211,9 +212,19 @@ class Product
         return $this->description;
     }
 
-    public function getPrice(): int
+    public function getRawPrice(): int
     {
         return $this->price;
+    }
+
+    public function getFormattedPrice(): string
+    {
+        return Formatter::formattedPrice($this->price);
+    }
+
+    public function getPrice(): string
+    {
+        return $this->price / 100;
     }
 
     public function getColor(): ?string

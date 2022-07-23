@@ -40,6 +40,11 @@ class ProductRepository extends EntityRepository
         }
     }
 
+    public function findBySku(string $sku): ?Product
+    {
+        return $this->findOneBy(['sku' => $sku]);
+    }
+
     public function findAll(): array
     {
         return $this->findBy(['deletedAt' => null]);

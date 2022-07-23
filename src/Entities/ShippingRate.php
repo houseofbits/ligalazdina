@@ -21,9 +21,9 @@ class ShippingRate
     protected int $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string", length=150, nullable=true)
      */
-    protected int $productType;
+    protected ?string $printfulVariantId = null;
 
     /**
      * @ORM\Column(type="integer")
@@ -45,20 +45,15 @@ class ShippingRate
      */
     protected int $price;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    protected int $extraPrice;
-
     public function setId(int $id): ShippingRate
     {
         $this->id = $id;
         return $this;
     }
 
-    public function setProductType(int $productType): ShippingRate
+    public function setPrintfulVariantId(int $printfulVariantId): ShippingRate
     {
-        $this->productType = $productType;
+        $this->printfulVariantId = $printfulVariantId;
         return $this;
     }
 
@@ -86,20 +81,14 @@ class ShippingRate
         return $this;
     }
 
-    public function setExtraPrice(int $extraPrice): ShippingRate
-    {
-        $this->extraPrice = $extraPrice;
-        return $this;
-    }
-
     public function getId(): int
     {
         return $this->id;
     }
 
-    public function getProductType(): int
+    public function getPrintfulVariantId(): int
     {
-        return $this->productType;
+        return $this->printfulVariantId;
     }
 
     public function getZone(): int
@@ -120,10 +109,5 @@ class ShippingRate
     public function getPrice(): int
     {
         return $this->price;
-    }
-
-    public function getExtraPrice(): int
-    {
-        return $this->extraPrice;
     }
 }
